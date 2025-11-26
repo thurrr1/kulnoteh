@@ -14,10 +14,7 @@ class ScheduleController extends Controller
         $schedules = Schedule::where('user_id',auth('sanctum')->id())
                              ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $schedules
-        ]);
+        return response()->json($schedules);
     }
 
     /**
