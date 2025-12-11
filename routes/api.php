@@ -19,8 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // API Resource untuk Jadwal
     // Endpoint: /api/schedules, /api/schedules/{id}
     Route::apiResource('schedules', ScheduleController::class);
-    Route::apiResource('api/notes', NoteController::class);
-    Route::apiResource('api/reminders', ReminderController::class);
+    Route::apiResource('notes', NoteController::class);
+    Route::apiResource('reminders', ReminderController::class);
     // Contoh route terproteksi lainnya:
     // Route::get('/user', function (Request $request) {
     //     return $request->user();

@@ -34,7 +34,8 @@ class NoteController extends Controller
         $request->validate([
             'judul_catatan' => 'required|string|max:255',
             'id_jadwal' => 'required|string', // Wajib terikat ke jadwal
-            'isi_teks' => 'nullable|string',
+            'isi_teks' => 'nullable|string', // Deprecated: untuk backward compatibility
+            'content_json' => 'nullable|array', // JSON array dari List<NoteContentItem>
         ]);
         
         // 1. Cek apakah id_jadwal valid dan milik user yang login (Security Check)
@@ -56,6 +57,7 @@ class NoteController extends Controller
             'id_jadwal' => $request->id_jadwal,
             'judul_catatan' => $request->judul_catatan,
             'isi_teks' => $request->isi_teks,
+            'content_json' => $request->content_json ?? [], // Default empty array jika tidak ada
         ]);
 
         return Response::json([
@@ -65,5 +67,89 @@ class NoteController extends Controller
         ], 201);
     }
     
-    // ... Tambahkan show, update, destroy nanti (gunakan logika otentikasi yang sama dengan ScheduleController)
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id): JsonResponse
+    {
+        $note = Note::where('id', $id)
+                    ->where('user_id', auth('sanctum')->id())
+                    ->first();
+
+        if (!$note) {
+            return Response::json([
+                'status' => 'error',
+                'message' => 'Catatan tidak ditemukan atau bukan milik Anda.'
+            ], 404);
+        }
+
+        return Response::json([
+            'status' => 'success',
+            'data' => $note
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'judul_catatan' => 'required|string|max:255',
+            'id_jadwal' => 'required|string',
+            'isi_teks' => 'nullable|string',
+            'content_json' => 'nullable|array',
+        ]);
+        
+        // 1. Cari Note dan pastikan itu milik user yang login
+        $note = Note::where('id', $id)
+                    ->where('user_id', auth('sanctum')->id())
+                    ->first();
+
+        if (!$note) {
+            return Response::json([
+                'status' => 'error',
+                'message' => 'Catatan tidak ditemukan atau bukan milik Anda.'
+            ], 404);
+        }
+
+        // 2. Update data
+        $note->update([
+            'judul_catatan' => $request->judul_catatan,
+            'isi_teks' => $request->isi_teks,
+            'content_json' => $request->content_json ?? $note->content_json ?? [],
+        ]);
+
+        return Response::json([
+            'status' => 'success',
+            'message' => 'Catatan berhasil diperbarui.',
+            'data' => $note
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        // 1. Cari Note dan pastikan itu milik user yang login
+        $note = Note::where('id', $id)
+                    ->where('user_id', auth('sanctum')->id())
+                    ->first();
+
+        if (!$note) {
+            return Response::json([
+                'status' => 'error',
+                'message' => 'Catatan tidak ditemukan atau bukan milik Anda.'
+            ], 404);
+        }
+
+        // 2. Hapus data
+        $note->delete();
+
+        return Response::json([
+            'status' => 'success',
+            'message' => 'Catatan berhasil dihapus.'
+        ], 200);
+    }
 }

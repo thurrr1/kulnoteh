@@ -20,7 +20,13 @@ class Note extends Model
         'user_id',
         'id_jadwal', // Foreign Key ke schedules.id
         'judul_catatan',
-        'isi_teks', 
+        'isi_teks', // Deprecated: Gunakan content_json
+        'content_json', // JSON array dari List<NoteContentItem>
+    ];
+
+    // Cast content_json sebagai array agar otomatis di-decode dari JSON
+    protected $casts = [
+        'content_json' => 'array',
     ];
 
     // Relasi: Note dimiliki oleh satu Schedule

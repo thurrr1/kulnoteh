@@ -38,7 +38,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'user' => [
-                'id' => $user->id,
+                'id' => (string) $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
             ],
@@ -70,7 +70,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Registrasi berhasil. User dibuat dan login otomatis.',
             'user' => [
-                'id' => $user->id,
+                'id' => (string) $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
             ],
