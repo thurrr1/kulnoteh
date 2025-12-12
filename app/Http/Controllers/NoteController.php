@@ -113,7 +113,21 @@ class NoteController extends Controller
             ], 404);
         }
 
-        // 2. Update data
+        // 2. Cleanup old files yang dihapus dari content
+        $oldPaths = FileController::extractFilePathsFromContent($note->content_json ?? []);
+        $newPaths = FileController::extractFilePathsFromContent($request->content_json ?? []);
+        $deletedPaths = array_diff($oldPaths, $newPaths);
+        
+        foreach ($deletedPaths as $path) {
+            try {
+                \Storage::disk('public')->delete($path);
+                \Log::info("Deleted orphaned file: $path");
+            } catch (\Exception $e) {
+                \Log::error("Failed to delete file $path: " . $e->getMessage());
+            }
+        }
+
+        // 3. Update data
         $note->update([
             'judul_catatan' => $request->judul_catatan,
             'isi_teks' => $request->isi_teks,
@@ -144,7 +158,18 @@ class NoteController extends Controller
             ], 404);
         }
 
-        // 2. Hapus data
+        // 2. Cleanup semua file terkait
+        $filePaths = FileController::extractFilePathsFromContent($note->content_json ?? []);
+        foreach ($filePaths as $path) {
+            try {
+                \Storage::disk('public')->delete($path);
+                \Log::info("Deleted file on note deletion: $path");
+            } catch (\Exception $e) {
+                \Log::error("Failed to delete file $path: " . $e->getMessage());
+            }
+        }
+
+        // 3. Hapus data
         $note->delete();
 
         return Response::json([

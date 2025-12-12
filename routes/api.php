@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\FileController;
 
 // Route untuk Registrasi User Baru
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -21,6 +22,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('schedules', ScheduleController::class);
     Route::apiResource('notes', NoteController::class);
     Route::apiResource('reminders', ReminderController::class);
+    
+    // File Upload & Management
+    Route::post('/files/upload', [FileController::class, 'upload']);
+    Route::delete('/files/delete', [FileController::class, 'delete']);
+    
     // Contoh route terproteksi lainnya:
     // Route::get('/user', function (Request $request) {
     //     return $request->user();
