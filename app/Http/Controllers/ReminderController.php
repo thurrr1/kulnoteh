@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule; // Wajib import untuk Rule::in
+use Illuminate\Support\Facades\Storage;
 
 class ReminderController extends Controller
 {
@@ -25,7 +26,7 @@ class ReminderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'jenis_reminder' => ['required', Rule::in(['Tugas', 'Ujian', 'Mandiri', 'KelasGanti'])],
+            'jenis_reminder' => 'required|string',
             'tanggal' => 'required|date', 
             'jam' => 'required|date_format:H:i:s', // Format jam
             'keterangan' => 'nullable|string', // Sesuai description di Kotlin
@@ -49,4 +50,25 @@ class ReminderController extends Controller
     }
     
     // ... Tambahkan show, update, destroy (gunakan logika otentikasi yang sama dengan ScheduleController)
+
+    /**
+     * Get all files associated with a specific reminder.
+     * GET /api/reminders/{id}/files
+     */
+    public function getFiles(string $id): JsonResponse
+    {
+        // Find the reminder for the authenticated user
+        $reminder = Reminder::where('id', $id)
+                            ->where('user_id', auth('sanctum')->id())
+                            ->firstOrFail();
+
+        // Load the files relationship. The 'url' attribute will be automatically
+        // appended thanks to the accessor in the FileCatatan model.
+        $files = $reminder->files;
+
+        return Response::json([
+            'status' => 'success',
+            'data' => $files,
+        ]);
+    }
 }
