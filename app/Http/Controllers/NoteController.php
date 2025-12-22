@@ -6,6 +6,8 @@ use App\Models\Note;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 
@@ -120,10 +122,10 @@ class NoteController extends Controller
         
         foreach ($deletedPaths as $path) {
             try {
-                \Storage::disk('public')->delete($path);
-                \Log::info("Deleted orphaned file: $path");
+                Storage::disk('public')->delete($path);
+                Log::info("Deleted orphaned file: $path");
             } catch (\Exception $e) {
-                \Log::error("Failed to delete file $path: " . $e->getMessage());
+                Log::error("Failed to delete file $path: " . $e->getMessage());
             }
         }
 
@@ -162,10 +164,10 @@ class NoteController extends Controller
         $filePaths = FileController::extractFilePathsFromContent($note->content_json ?? []);
         foreach ($filePaths as $path) {
             try {
-                \Storage::disk('public')->delete($path);
-                \Log::info("Deleted file on note deletion: $path");
+                Storage::disk('public')->delete($path);
+                Log::info("Deleted file on note deletion: $path");
             } catch (\Exception $e) {
-                \Log::error("Failed to delete file $path: " . $e->getMessage());
+                Log::error("Failed to delete file $path: " . $e->getMessage());
             }
         }
 

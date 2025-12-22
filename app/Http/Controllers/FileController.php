@@ -97,4 +97,44 @@ class FileController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Helper: Extract semua file paths dari content_json
+     * Method static agar bisa dipanggil dari controller lain
+     */
+    public static function extractFilePathsFromContent($contentJson): array
+    {
+        $paths = [];
+        
+        if (!is_array($contentJson)) {
+            return $paths;
+        }
+        
+        foreach ($contentJson as $item) {
+            // Extract image paths
+            if (isset($item['type']) && $item['type'] === 'image' && isset($item['imageUri'])) {
+                $url = $item['imageUri'];
+                // Extract path from URL (format: http://domain/storage/notes/images/uuid.jpg)
+                if (str_contains($url, '/storage/')) {
+                    $path = str_replace(url('storage/'), '', $url);
+                    if (str_starts_with($path, 'notes/')) {
+                        $paths[] = $path;
+                    }
+                }
+            }
+            
+            // Extract file paths
+            if (isset($item['type']) && $item['type'] === 'file' && isset($item['fileUri'])) {
+                $url = $item['fileUri'];
+                if (str_contains($url, '/storage/')) {
+                    $path = str_replace(url('storage/'), '', $url);
+                    if (str_starts_with($path, 'notes/')) {
+                        $paths[] = $path;
+                    }
+                }
+            }
+        }
+        
+        return array_unique($paths);
+    }
 }
