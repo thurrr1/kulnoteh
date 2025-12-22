@@ -102,6 +102,99 @@ class FileController extends Controller
      * Helper: Extract semua file paths dari content_json
      * Method static agar bisa dipanggil dari controller lain
      */
+    public function upload(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:jpeg,jpg,png,gif,pdf,doc,docx|max:10240', // Max 10MB
+            'type' => 'required|string|in:image,document', // Type untuk kategorisasi
+        ]);
+
+        try {
+            $file = $request->file('file');
+            
+            // Generate unique filename
+            $extension = $file->getClientOriginalExtension();
+            $filename = Str::uuid() . '.' . $extension;
+            
+            // Tentukan folder berdasarkan type
+            $folder = $request->type === 'image' ? 'notes/images' : 'notes/documents';
+            
+            // Simpan file ke storage/app/public/{folder}
+            $path = $file->storeAs($folder, $filename, 'public');
+            
+            // Generate URL publik
+            $url = url('storage/' . $path);
+            
+            return Response::json([
+                'status' => 'success',
+                'message' => 'File berhasil diupload.',
+                'data' => [
+                    'filename' => $filename,
+                    'path' => $path,
+                    'url' => $url,
+                    'type' => $request->type,
+                    'size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                ]
+            ], 201);
+            
+        } catch (\Exception $e) {
+            return Response::json([
+                'status' => 'error',
+                'message' => 'Gagal mengupload file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Hapus file dari storage
+     * DELETE /api/files/{path}
+     * Path format: notes/images/uuid.jpg atau notes/documents/uuid.pdf
+     */
+    public function delete(Request $request): JsonResponse
+    {
+        $request->validate([
+            'path' => 'required|string',
+        ]);
+
+        try {
+            $path = $request->path;
+            
+            // Security: Pastikan path hanya di dalam folder notes/
+            if (!str_starts_with($path, 'notes/')) {
+                return Response::json([
+                    'status' => 'error',
+                    'message' => 'Invalid file path.'
+                ], 403);
+            }
+            
+            // Cek apakah file exists
+            if (!Storage::disk('public')->exists($path)) {
+                return Response::json([
+                    'status' => 'error',
+                    'message' => 'File tidak ditemukan.'
+                ], 404);
+            }
+            
+            // Hapus file
+            Storage::disk('public')->delete($path);
+            
+            return Response::json([
+                'status' => 'success',
+                'message' => 'File berhasil dihapus.'
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return Response::json([
+                'status' => 'error',
+                'message' => 'Gagal menghapus file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper: Extract semua file paths dari content_json
+     */
     public static function extractFilePathsFromContent($contentJson): array
     {
         $paths = [];
