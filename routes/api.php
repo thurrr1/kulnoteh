@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // File Upload & Management
     Route::post('/files', [FileController::class, 'store'])->name('files.store');
     Route::get('/reminders/{id}/files', [ReminderController::class, 'getFiles'])->name('reminders.files');
+    Route::post('/files/upload', [FileController::class, 'upload']);
+    Route::delete('/files/delete', [FileController::class, 'delete']);
     
     // Contoh route terproteksi lainnya:
     // Route::get('/user', function (Request $request) {
