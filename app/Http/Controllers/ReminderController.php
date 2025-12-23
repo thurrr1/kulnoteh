@@ -48,6 +48,54 @@ class ReminderController extends Controller
             'data' => $reminder
         ], 201);
     }
+
+    public function show(string $id): JsonResponse
+    {
+        $reminder = Reminder::where('id', $id)
+                            ->where('user_id', auth('sanctum')->id())
+                            ->firstOrFail();
+
+        return Response::json([
+            'status' => 'success',
+            'data' => $reminder
+        ]);
+    }
+
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $reminder = Reminder::where('id', $id)
+                            ->where('user_id', auth('sanctum')->id())
+                            ->firstOrFail();
+
+        $request->validate([
+            'jenis_reminder' => 'required|string',
+            'tanggal' => 'required|date',
+            'jam' => 'required|date_format:H:i:s',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $reminder->update($request->all());
+
+        return Response::json([
+            'status' => 'success',
+            'message' => 'Reminder berhasil diperbarui.',
+            'data' => $reminder
+        ]);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $reminder = Reminder::where('id', $id)
+                            ->where('user_id', auth('sanctum')->id())
+                            ->firstOrFail();
+
+        $reminder->delete();
+
+        return Response::json([
+            'status' => 'success',
+            'message' => 'Reminder berhasil dihapus.'
+        ], 200);
+    }
     
     // ... Tambahkan show, update, destroy (gunakan logika otentikasi yang sama dengan ScheduleController)
 
