@@ -47,7 +47,7 @@
         ],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan serve --host=192.168.110.178 --port=8000"
+            "@php artisan serve --host=192.168.100.20 --port=8000"
         ],
         "test": [
             "@php artisan config:clear --ansi",

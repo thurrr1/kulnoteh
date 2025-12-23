@@ -9,12 +9,10 @@ class RouteServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
     }
 
     public function boot(): void
     {
-        // Panggil fungsi untuk load routes api.php
         $this->mapApiRoutes();
     }
 
